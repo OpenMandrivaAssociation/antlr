@@ -10,7 +10,7 @@
 Summary:        ANother Tool for Language Recognition
 Name:           antlr
 Version:        2.7.7
-Release:        %mkrel 1.2
+Release:        %mkrel 1.3
 Epoch:          0
 License:        Public Domain
 URL:            http://www.antlr.org/
@@ -28,8 +28,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires:  gcc-java, make
 %else
 %if %{gcj_support}
-Requires(post): java-gcj-compat
-Requires(postun): java-gcj-compat
 BuildRequires:  java-gcj-compat-devel
 %else
 Buildarch:      noarch
