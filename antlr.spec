@@ -38,8 +38,8 @@ BuildRequires:  perl
 BuildRequires:  java-javadoc
 %endif
 Requires:       jpackage-utils
-Requires(post): %{_sbindir}/update-alternatives
-Requires(postun): %{_sbindir}/update-alternatives
+Requires(post): update-alternatives
+Requires(postun): update-alternatives
 %endif
 
 %description
@@ -53,8 +53,8 @@ parsers].
 Group:          Development/Java
 Summary:        ANother Tool for Language Recognition (native version)
 Provides:       %{name} = %{epoch}:%{version}-%{release}
-Requires(post): %{_sbindir}/update-alternatives
-Requires(postun): %{_sbindir}/update-alternatives
+Requires(post): update-alternatives
+Requires(postun): update-alternatives
 
 %description    native
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
