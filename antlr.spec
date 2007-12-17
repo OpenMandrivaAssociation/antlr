@@ -22,7 +22,6 @@ Source1:        %{name}-build.xml
 Source2:        %{name}-script
 Source3:        http://www.antlr.org/share/1069557132934/makefile.gcj
 Patch0:         %{name}-jedit.patch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %if %{native}
 BuildRequires:  gcc-java, make
