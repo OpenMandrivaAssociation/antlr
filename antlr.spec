@@ -10,13 +10,11 @@
 Summary:        ANother Tool for Language Recognition
 Name:           antlr
 Version:        2.7.7
-Release:        %mkrel 2.3
+Release:        %mkrel 2.3.1
 Epoch:          0
 License:        Public Domain
 URL:            http://www.antlr.org/
 Group:          Development/Java
-#Vendor:        JPackage Project
-#Distribution:  JPackage
 Source0:        http://www.antlr.org/download/antlr-%{version}.tar.gz
 Source1:        %{name}-build.xml
 Source2:        %{name}-script
@@ -33,6 +31,7 @@ BuildRequires:  java-gcj-compat-devel
 Buildarch:      noarch
 %endif
 BuildRequires:  ant
+BuildRequires:  java-rpmbuild
 BuildRequires:  perl
 BuildRequires:  jakarta-commons-launcher
 %if %without bootstrap
@@ -109,6 +108,7 @@ cp -p %{SOURCE1} build.xml
 %if %{native}
 %{__make} -f %{SOURCE3} COMPOPTS="$RPM_OPT_FLAGS"
 %else
+export CLASSPATH=$(build-classpath ant ant-launcher)
 %if %without bootstrap
 %ant -Dj2se.apidoc=%{_javadocdir}/java jar javadoc
 %else
