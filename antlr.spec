@@ -34,6 +34,7 @@ Buildarch:      noarch
 %endif
 BuildRequires:  ant
 BuildRequires:  perl
+BuildRequires:  jakarta-commons-launcher
 %if %without bootstrap
 BuildRequires:  java-javadoc
 %endif
