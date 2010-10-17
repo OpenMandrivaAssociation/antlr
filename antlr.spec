@@ -3,7 +3,7 @@
 Summary:        ANother Tool for Language Recognition
 Name:           antlr
 Version:        2.7.7
-Release:        %mkrel 9
+Release:        %mkrel 10
 Epoch:          0
 License:        Public Domain
 URL:            http://www.antlr.org/
@@ -37,7 +37,6 @@ parsers].
 %package        native
 Group:          Development/Java
 Summary:        ANother Tool for Language Recognition (native version)
-Provides:       %{name} = %{epoch}:%{version}-%{release}
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
 
