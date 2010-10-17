@@ -3,7 +3,7 @@
 Summary:        ANother Tool for Language Recognition
 Name:           antlr
 Version:        2.7.7
-Release:        %mkrel 8
+Release:        %mkrel 9
 Epoch:          0
 License:        Public Domain
 URL:            http://www.antlr.org/
@@ -23,7 +23,9 @@ BuildRequires:	java-devel
 %if %without bootstrap
 BuildRequires:  java-javadoc
 %endif
-Requires:	java
+Requires:	jpackage-utils
+Requires(post): update-alternatives
+Requires(postun): update-alternatives
 
 %description
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
