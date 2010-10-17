@@ -1,16 +1,9 @@
 %bcond_with bootstrap
-%define section free
-%define jedit 0
-%define native 0
-%define gcj_support 1
-%if %{native}
-%define gcj_support 0
-%endif
 
 Summary:        ANother Tool for Language Recognition
 Name:           antlr
 Version:        2.7.7
-Release:        %mkrel 6
+Release:        %mkrel 7
 Epoch:          0
 License:        Public Domain
 URL:            http://www.antlr.org/
@@ -20,27 +13,18 @@ Source1:        %{name}-build.xml
 Source2:        %{name}-script
 Source3:        http://www.antlr.org/share/1069557132934/makefile.gcj
 Patch0:         %{name}-jedit.patch
+Patch1:		antlr-2.7.7-newgcc.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-
-%if %{native}
-BuildRequires:  gcc-java, make
-%else
-%if %{gcj_support}
-BuildRequires:  java-gcj-compat-devel
-%else
-Buildarch:      noarch
-%endif
-BuildRequires:  ant
-BuildRequires:  java-rpmbuild
-BuildRequires:  perl
-BuildRequires:  jakarta-commons-launcher
+BuildRequires:	mono-winforms
+BuildRequires:	ant
+BuildRequires:	java-javadoc
+BuildRequires:	jpackage-utils
+BuildRequires:	java-devel
 %if %without bootstrap
 BuildRequires:  java-javadoc
 %endif
-Requires:       jpackage-utils
-Requires(post): update-alternatives
-Requires(postun): update-alternatives
-%endif
+Requires:	jackage-utils
+Requires:	java
 
 %description
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
@@ -79,55 +63,29 @@ Summary:        Javadoc for %{name}
 Javadoc for %{name}.
 %endif
 
-%if %{jedit}
-%package        jedit
-Group:          Text Editors
-Summary:        ANTLR mode for jEdit
-Requires:       jedit >= 0:4.1
-
-%description    jedit
-ANTLR mode for jEdit.  To enable this mode, insert the following into your
-%{_datadir}/jedit/modes/catalog:
-
-  <MODE NAME="antlr" FILE="antlr.xml" FILE_NAME_GLOB="*.g"/>
-%endif
-
 %prep
 %setup -q
 # remove all binary libs
 find . -name "*.jar" -exec rm -f {} \;
-%if !%{native}
-%if %{jedit}
-%patch0 -p0
-%endif
 cp -p %{SOURCE1} build.xml
-%endif
-
+%patch1
+# CRLF->LF
+sed -i 's/\r//' LICENSE.txt
 
 %build
-%if %{native}
-%{__make} -f %{SOURCE3} COMPOPTS="$RPM_OPT_FLAGS"
-%else
-export CLASSPATH=$(build-classpath ant ant-launcher)
-%if %without bootstrap
-%ant -Dj2se.apidoc=%{_javadocdir}/java jar javadoc
-%else
-%ant -Dj2se.apidoc=%{_javadocdir}/java jar
-%endif
-%endif
-
+ant -Dj2se.apidoc=%{_javadocdir}/java
+cp work/lib/antlr.jar .  # make expects to find it here
+export CLASSPATH=.
+%configure2_5x --without-examples
+make CXXFLAGS="${CXXFLAGS} -fPIC" DEBUG=1 verbose=1
+rm antlr.jar			 # no longer needed
 
 %install
 rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT{%{_includedir}/%{name},%{_libdir},%{_bindir}}
 
-install -dm 755 $RPM_BUILD_ROOT%{_bindir}
-touch $RPM_BUILD_ROOT%{_bindir}/antlr # for %%ghost
+touch $RPM_BUILD_ROOT%{_bindir}/antlr
 
-%if %{native}
-
-install -pm 755 cantlr $RPM_BUILD_ROOT%{_bindir}/antlr-native
-
-%else
 # jars
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
 cp -p work/lib/%{name}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
@@ -136,6 +94,12 @@ cp -p work/lib/%{name}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
 # script
 cp -p %{SOURCE2} $RPM_BUILD_ROOT%{_bindir}/antlr-java
 
+# C++ lib and headers, antlr-config
+
+install -p -m 644 lib/cpp/antlr/*.hpp $RPM_BUILD_ROOT%{_includedir}/%{name}
+install -p -m 644 lib/cpp/src/libantlr.a $RPM_BUILD_ROOT%{_libdir}
+install -p -m 755 scripts/antlr-config $RPM_BUILD_ROOT%{_bindir}
+
 # javadoc
 %if %without bootstrap
 mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
@@ -143,26 +107,10 @@ cp -pr work/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 %endif
 
-# jedit mode
-%if %{jedit}
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/jedit/modes
-cp -p extras/antlr-jedit.xml $RPM_BUILD_ROOT%{_datadir}/jedit/modes/antlr.xml
-%endif
-%endif
-
-%{__perl} -pi -e 's/\r$//g' LICENSE.txt doc/{index.html,python-runtime.html}
-
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %post
-%if %{gcj_support}
-%{update_gcjdb}
-%endif
 %{_sbindir}/update-alternatives --install %{_bindir}/antlr \
   %{name} %{_bindir}/antlr-java 10
 
@@ -170,20 +118,6 @@ rm -rf $RPM_BUILD_ROOT
 if [ $1 -eq 0 ] ; then
   %{_sbindir}/update-alternatives --remove %{name} %{_bindir}/antlr-java
 fi
-%if %{gcj_support}
-%{clean_gcjdb}
-%endif
-
-%if %{native}
-%post native
-%{_sbindir}/update-alternatives --install %{_bindir}/antlr \
-  %{name} %{_bindir}/antlr-native 20
-
-%postun native
-if [ $1 -eq 0 ] ; then
-  %{_sbindir}/update-alternatives --remove %{name} %{_bindir}/antlr-native
-fi
-%endif
 
 %if %without bootstrap
 %post javadoc
@@ -196,23 +130,17 @@ if [ $1 -eq 0 ]; then
 fi
 %endif
 
-%if %{native}
 %files native
 %defattr(0644,root,root,0755)
-%doc LICENSE.txt
-%defattr(0755,root,root,0755)
-%ghost %{_bindir}/antlr
-%{_bindir}/antlr-native
+%defattr(-,root,root,-)
+%{_includedir}/%{name}
+%{_libdir}/libantlr.a
+%{_bindir}/antlr-config
 
-%else
 %files
 %defattr(0644,root,root,0755)
 %doc LICENSE.txt
 %{_javadir}/%{name}*.jar
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/*
-%endif
 %defattr(0755,root,root,0755)
 %ghost %{_bindir}/antlr
 %{_bindir}/antlr-java
@@ -227,12 +155,3 @@ fi
 %doc %{_javadocdir}/%{name}-%{version}
 %ghost %doc %{_javadocdir}/%{name}
 %endif
-
-%if %{jedit}
-%files jedit
-%defattr(0644,root,root,0755)
-%{_datadir}/jedit/modes/*
-%endif
-%endif
-
-
