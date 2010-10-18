@@ -38,8 +38,6 @@ parsers].
 %package        native
 Group:          Development/Java
 Summary:        ANother Tool for Language Recognition (native version)
-Requires(post): update-alternatives
-Requires(postun): update-alternatives
 
 %description    native
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
