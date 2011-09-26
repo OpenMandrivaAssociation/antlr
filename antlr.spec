@@ -3,7 +3,7 @@
 Summary:        ANother Tool for Language Recognition
 Name:           antlr
 Version:        2.7.7
-Release:        %mkrel 12
+Release:        %mkrel 13
 Epoch:          0
 License:        Public Domain
 URL:            http://www.antlr.org/
