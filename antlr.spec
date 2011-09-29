@@ -1,32 +1,33 @@
 %bcond_with bootstrap
 
-Summary:        ANother Tool for Language Recognition
-Name:           antlr
-Version:        2.7.7
-Release:        %mkrel 13
-Epoch:          0
-License:        Public Domain
-URL:            http://www.antlr.org/
-Group:          Development/Java
-Source0:        http://www.antlr.org/download/antlr-%{version}.tar.gz
-Source1:        %{name}-build.xml
-Source2:        %{name}-script
-Source3:        http://www.antlr.org/share/1069557132934/makefile.gcj
-Patch0:         %{name}-jedit.patch
+Summary:	ANother Tool for Language Recognition
+Name:		antlr
+Version:	2.7.7
+Release:	17
+License:	Public Domain
+URL:		http://www.antlr.org/
+Group:		Development/Java
+Source0:	http://www.antlr.org/download/antlr-%{version}.tar.gz
+Source1:	%{name}-build.xml
+Source2:	%{name}-script
+Source3:	http://www.antlr.org/share/1069557132934/makefile.gcj
+Patch0:		%{name}-jedit.patch
 Patch1:		antlr-2.7.7-newgcc.patch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
+%ifnarch %arm
 BuildRequires:	mono-winforms
-BuildRequires:	ant
-BuildRequires:	java-javadoc
-BuildRequires:	jpackage-utils
-BuildRequires:	java-devel
-%if %without bootstrap
-BuildRequires:  java-javadoc
 %endif
+BuildRequires:	ant
+BuildRequires:	java-devel
+BuildRequires:	jpackage-utils
+%if %without bootstrap
+BuildRequires:	java-javadoc
+%endif
+Requires:	java
 Requires:	jpackage-utils
-Requires:	jre
-Requires(post): update-alternatives
+Requires(post):	update-alternatives
 Requires(postun): update-alternatives
+Provides:	%{name}-tool = %{EVRD}
 
 %description
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
@@ -35,32 +36,43 @@ compilers, and translators from grammatical descriptions containing
 C++ or Java actions [You can use PCCTS 1.xx to generate C-based
 parsers].
 
-%package        native
-Group:          Development/Java
-Summary:        ANother Tool for Language Recognition (native version)
+%package	native
+Group:		Development/Java
+Summary:	ANother Tool for Language Recognition (native version)
+Provides:	%{name}-C++ = %{EVRD}
 
-%description    native
+%description	native
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
 language tool that provides a framework for constructing recognizers,
 compilers, and translators from grammatical descriptions containing
 C++ or Java actions [You can use PCCTS 1.xx to generate C-based
 parsers].  This package includes the native version of the antlr tool.
 
-%package        manual
-Group:          Development/Java
-Summary:        Manual for %{name}
+%package	manual
+Group:		Development/Java
+Summary:	Manual for %{name}
 
-%description    manual
+%description	manual
 Documentation for %{name}.
 
 %if %without bootstrap
-%package        javadoc
-Group:          Development/Java
-Summary:        Javadoc for %{name}
+%package	javadoc
+Group:		Development/Java
+Summary:	Javadoc for %{name}
 
-%description    javadoc
+%description	javadoc
 Javadoc for %{name}.
 %endif
+
+%package	python
+Group:		Development/Java
+Summary:	Python runtime support for ANTLR-generated parsers
+BuildRequires:	python-devel
+BuildRequires:	python-setuptools
+BuildArch:	noarch
+
+%description	python
+Python runtime support for ANTLR-generated parsers
 
 %prep
 %setup -q
@@ -79,35 +91,55 @@ export CLASSPATH=.
 make CXXFLAGS="${CXXFLAGS} -fPIC" DEBUG=1 verbose=1
 rm antlr.jar			 # no longer needed
 
-%install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT{%{_includedir}/%{name},%{_libdir},%{_bindir}}
+# fix doc permissions and remove Makefiles
+rm doc/{Makefile,Makefile.in}
+chmod 0644 doc/*
 
-touch $RPM_BUILD_ROOT%{_bindir}/antlr
+# generate doxygen docs for C++ bindings
+pushd lib/cpp
+    doxygen doxygen.cfg
+    find gen_doc -type f -exec chmod 0644 {} \;
+popd
+
+# build python
+cd lib/python
+%{__python} setup.py build
+cd ../../
+
+%install
+rm -rf %{buildroot}
+mkdir -p %{buildroot}{%{_includedir}/%{name},%{_libdir},%{_bindir}}
+
+touch %{buildroot}%{_bindir}/antlr
 
 # jars
-mkdir -p $RPM_BUILD_ROOT%{_javadir}
-cp -p work/lib/%{name}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
+mkdir -p %{buildroot}%{_javadir}
+cp -p work/lib/%{name}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
+(cd %{buildroot}%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
 
 # script
-cp -p %{SOURCE2} $RPM_BUILD_ROOT%{_bindir}/antlr-java
+cp -p %{SOURCE2} %{buildroot}%{_bindir}/antlr-java
 
 # C++ lib and headers, antlr-config
 
-install -p -m 644 lib/cpp/antlr/*.hpp $RPM_BUILD_ROOT%{_includedir}/%{name}
-install -p -m 644 lib/cpp/src/libantlr.a $RPM_BUILD_ROOT%{_libdir}
-install -p -m 755 scripts/antlr-config $RPM_BUILD_ROOT%{_bindir}
+install -p -m 644 lib/cpp/antlr/*.hpp %{buildroot}%{_includedir}/%{name}
+install -p -m 644 lib/cpp/src/libantlr.a %{buildroot}%{_libdir}
+install -p -m 755 scripts/antlr-config %{buildroot}%{_bindir}
 
 # javadoc
 %if %without bootstrap
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr work/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+mkdir -p %{buildroot}%{_javadocdir}/%{name}-%{version}
+cp -pr work/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
+ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 %endif
 
+# python
+cd lib/python
+%{__python} setup.py install -O1 --skip-build --root %{buildroot}
+cd ../..
+
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %post
 %{_sbindir}/update-alternatives --install %{_bindir}/antlr \
@@ -154,3 +186,8 @@ fi
 %doc %{_javadocdir}/%{name}-%{version}
 %ghost %doc %{_javadocdir}/%{name}
 %endif
+
+%files python
+%defattr(-,root,root,-)
+%{python_sitelib}/antlr/*
+%{python_sitelib}/antlr-*
