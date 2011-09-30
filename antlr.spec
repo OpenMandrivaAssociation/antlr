@@ -22,6 +22,7 @@ BuildRequires:	mono-winforms
 %endif
 %endif
 BuildRequires:	ant
+BuildRequires:	doxygen
 BuildRequires:	java-devel
 BuildRequires:	jpackage-utils
 %if %without bootstrap
