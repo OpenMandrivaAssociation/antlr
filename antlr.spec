@@ -1,5 +1,7 @@
 %bcond_with bootstrap
 
+%define		build_mono		0
+
 Summary:	ANother Tool for Language Recognition
 Name:		antlr
 Version:	2.7.7
@@ -15,7 +17,9 @@ Patch0:		%{name}-jedit.patch
 Patch1:		antlr-2.7.7-newgcc.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 %ifnarch %arm
+%if %{build_mono}
 BuildRequires:	mono-winforms
+%endif
 %endif
 BuildRequires:	ant
 BuildRequires:	java-devel
@@ -87,7 +91,13 @@ sed -i 's/\r//' LICENSE.txt
 ant -Dj2se.apidoc=%{_javadocdir}/java
 cp work/lib/antlr.jar .  # make expects to find it here
 export CLASSPATH=.
-%configure2_5x --without-examples
+%configure2_5x --without-examples			\
+%if %{build_mono}
+	--enable-mono
+%else
+	--disable-mono
+%endif
+
 make CXXFLAGS="${CXXFLAGS} -fPIC" DEBUG=1 verbose=1
 rm antlr.jar			 # no longer needed
 
