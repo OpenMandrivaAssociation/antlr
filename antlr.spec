@@ -126,27 +126,27 @@ cd lib/python
 cd ../../
 
 %install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT{%{_includedir}/%{name},%{_libdir},%{_bindir}}
+rm -rf %{buildroot}
+mkdir -p %{buildroot}{%{_includedir}/%{name},%{_libdir},%{_bindir}}
 
 # jars
-mkdir -p $RPM_BUILD_ROOT%{_javadir}
-cp -p work/lib/%{name}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
+mkdir -p %{buildroot}%{_javadir}
+cp -p work/lib/%{name}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
+(cd %{buildroot}%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
 
 # script
-install -p -m 755 %{SOURCE2} $RPM_BUILD_ROOT%{_bindir}/antlr
+install -p -m 755 %{SOURCE2} %{buildroot}%{_bindir}/antlr
 
 # C++ lib and headers, antlr-config
 
-install -p -m 644 lib/cpp/antlr/*.hpp $RPM_BUILD_ROOT%{_includedir}/%{name}
-install -p -m 644 lib/cpp/src/libantlr.a $RPM_BUILD_ROOT%{_libdir}
-install -p -m 755 scripts/antlr-config $RPM_BUILD_ROOT%{_bindir}
+install -p -m 644 lib/cpp/antlr/*.hpp %{buildroot}%{_includedir}/%{name}
+install -p -m 644 lib/cpp/src/libantlr.a %{buildroot}%{_libdir}
+install -p -m 755 scripts/antlr-config %{buildroot}%{_bindir}
 
 # javadoc
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr work/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+mkdir -p %{buildroot}%{_javadocdir}/%{name}-%{version}
+cp -pr work/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
+ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 
 # python
 cd lib/python
@@ -154,7 +154,7 @@ cd lib/python
 cd ../..
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %files tool
 %defattr(-,root,root,-)
