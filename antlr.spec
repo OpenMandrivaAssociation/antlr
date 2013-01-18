@@ -14,7 +14,7 @@ BuildRequires:	mono
 BuildRequires:	mono-winforms
 %endif
 BuildRequires:	gcc-java
-BuildRequires:	java-1.6.0-openjdk
+BuildRequires:	java-1.6.0-openjdk-devel
 
 %description
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
