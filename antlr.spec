@@ -4,7 +4,7 @@
 Summary:		ANother Tool for Language Recognition
 Name:			antlr
 Version:		2.7.7
-Release:		19
+Release:		20
 License:		Public Domain
 URL:			http://www.antlr.org/
 Group:			Development/Java
@@ -20,7 +20,7 @@ BuildRequires:	mono-winforms
 BuildRequires:	ant
 BuildRequires:	java-javadoc
 BuildRequires:	jpackage-utils
-BuildRequires:	java-devel
+BuildRequires:	java-1.6.0-openjdk-devel
 
 Requires:		jpackage-utils
 Requires:		java
