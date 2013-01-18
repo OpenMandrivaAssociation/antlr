@@ -1,29 +1,20 @@
-%global debug_package %{nil}
-# since we have only a static library
-
 Summary:		ANother Tool for Language Recognition
 Name:			antlr
 Version:		2.7.7
-Release:		20
+Release:		21
 License:		Public Domain
 URL:			http://www.antlr.org/
 Group:			Development/Java
 Source0:		http://www.antlr2.org/download/antlr-%{version}.tar.gz
-Source1:		%{name}-build.xml
-Source2:		%{name}-script
+Source1:		%{name}-script
 Patch1:			%{name}-%{version}-newgcc.patch
 
 %ifarch %ix86 x86_64 ia64 armv4l sparcv9 alpha s390x ppc ppc64
 BuildRequires:	mono
 BuildRequires:	mono-winforms
 %endif
-BuildRequires:	ant
-BuildRequires:	java-javadoc
-BuildRequires:	jpackage-utils
-BuildRequires:	java-1.6.0-openjdk-devel
-
-Requires:		jpackage-utils
-Requires:		java
+BuildRequires:	gcc-java
+BuildRequires:	java-1.6.0-openjdk
 
 %description
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
@@ -33,12 +24,8 @@ C++ or Java actions [You can use PCCTS 1.xx to generate C-based
 parsers].
 
 %package			tool
-Group:				Development/Java
+Group:				Development/Other
 Summary:			ANother Tool for Language Recognition
-BuildArch:			noarch
-Requires:			jpackage-utils
-Requires:			java
-%rename		%{name}
 
 %description	tool
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
@@ -46,6 +33,16 @@ language tool that provides a framework for constructing recognizers,
 compilers, and translators from grammatical descriptions containing
 C++ or Java actions [You can use PCCTS 1.xx to generate C-based
 parsers].
+
+%package		java
+Group:			Development/Java
+Requires:		jpackage-utils
+Requires:		java
+BuildArch:		noarch
+
+%description	java
+Version of %name-tool that is packaged as a Java jar file rather than
+native code.
 
 %package		manual
 Group:			Development/Java
@@ -94,20 +91,18 @@ Python runtime support for ANTLR-generated parsers
 
 %prep
 %setup -q
+%apply_patches
 # remove all binary libs
 find . -name "*.jar" -exec rm -f {} \;
-cp -p %{SOURCE1} build.xml
-%patch1
 # CRLF->LF
 sed -i 's/\r//' LICENSE.txt
 
 %build
-ant -Dj2se.apidoc=%{_javadocdir}/java
-cp work/lib/antlr.jar .  # make expects to find it here
-export CLASSPATH=.
 %configure --without-examples
 make CXXFLAGS="${CXXFLAGS} -fPIC" DEBUG=1 verbose=1
-rm antlr.jar			 # no longer needed
+
+# Generate a native version of the antlr tool so we don't have to require Java
+gcj $RPM_OPT_FLAGS --main=antlr.Tool -o antlr.bin antlr/antlr.jar
 
 # fix doc permissions and remove Makefiles
 rm doc/{Makefile,Makefile.in}
@@ -124,17 +119,24 @@ cd lib/python
 %{__python} setup.py build
 cd ../../
 
+# build javadoc
+# Unfortunately, we can't use gjdoc here because gjdoc has a hardcode
+# on loading /usr/share/java/antlr.jar -- something that doesn't exist
+# without either running as root (so we can copy the just-built one there)
+# or having a build dependency on ourselves.
+cd antlr
+find . -name "*.java" |xargs javadoc -d javadoc
+
 %install
-rm -rf %{buildroot}
 mkdir -p %{buildroot}{%{_includedir}/%{name},%{_libdir},%{_bindir}}
 
 # jars
 mkdir -p %{buildroot}%{_javadir}
-cp -p work/lib/%{name}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
+cp -p %name/%{name}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
 (cd %{buildroot}%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
 
 # script
-install -p -m 755 %{SOURCE2} %{buildroot}%{_bindir}/antlr
+install -p -m 755 %{SOURCE1} %{buildroot}%{_bindir}/antlr
 
 # C++ lib and headers, antlr-config
 
@@ -144,7 +146,7 @@ install -p -m 755 scripts/antlr-config %{buildroot}%{_bindir}
 
 # javadoc
 mkdir -p %{buildroot}%{_javadocdir}/%{name}-%{version}
-cp -pr work/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
+cp -pr antlr/javadoc/* %{buildroot}%{_javadocdir}/%{name}-%{version}
 ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 
 # python
@@ -152,11 +154,17 @@ cd lib/python
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 cd ../..
 
+# Install the native antlr
+mv %buildroot%_bindir/antlr %buildroot%_bindir/antlr-java
+cp antlr.bin %buildroot%_bindir/antlr
 
 %files tool
 %doc LICENSE.txt
-%{_javadir}/%{name}*.jar
 %{_bindir}/antlr
+
+%files java
+%{_javadir}/%{name}*.jar
+%{_bindir}/antlr-java
 
 # this is actually a development package for the C++ target
 # as we ship only a static library, it doesn't make sense
@@ -173,7 +181,9 @@ cd ../..
 %doc doc/*
 
 %files javadoc
+%if ! %{with bootstrap}
 %doc %{_javadocdir}/%{name}-%{version}
+%endif
 %doc %{_javadocdir}/%{name}
 
 %files python

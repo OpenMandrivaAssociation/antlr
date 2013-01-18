@@ -1,0 +1,15 @@
+--- antlr-2.7.7/build.xml.bero	2013-01-18 12:21:27.837857922 +0100
++++ antlr-2.7.7/build.xml	2013-01-18 12:24:39.681584199 +0100
+@@ -36,7 +36,11 @@
+   <!-- Build classes -->
+   <target name="classes" depends="prepare">
+     <javac srcdir="${src}" destdir="${build.classes}"
+-      debug="off" optimize="on" deprecation="on"/>
++      debug="off" optimize="on" deprecation="on">
++      <classpath>
++	 <pathelement location="@TOOLSJAR@"/>
++      </classpath>
++    </javac>
+   </target>
+ 
+   <!-- Build jar archives -->
