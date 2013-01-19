@@ -1,7 +1,7 @@
 Summary:		ANother Tool for Language Recognition
 Name:			antlr
 Version:		2.7.7
-Release:		21
+Release:		22
 License:		Public Domain
 URL:			http://www.antlr.org/
 Group:			Development/Java
@@ -26,6 +26,7 @@ parsers].
 %package			tool
 Group:				Development/Other
 Summary:			ANother Tool for Language Recognition
+Provides:			%name = %EVRD
 
 %description	tool
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
