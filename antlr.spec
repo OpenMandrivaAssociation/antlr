@@ -1,7 +1,7 @@
 Summary:		ANother Tool for Language Recognition
 Name:			antlr
 Version:		2.7.7
-Release:		22
+Release:		23
 License:		Public Domain
 URL:			http://www.antlr.org/
 Group:			Development/Java
