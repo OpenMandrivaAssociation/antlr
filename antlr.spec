@@ -5,7 +5,7 @@
 Summary:		ANother Tool for Language Recognition
 Name:			antlr
 Version:		2.7.7
-Release:		28.1%{?dist}
+Release:		28.2%{?dist}
 Epoch:			0
 License:		Public Domain
 URL:			http://www.antlr.org/
