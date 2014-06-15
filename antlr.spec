@@ -27,7 +27,7 @@ BuildRequires:	mono-winforms
 %endif
 BuildRequires:	ant
 BuildRequires:	java-javadoc
-BuildRequires:	jpackage-utils
+BuildRequires:	jpackage-utils javapackages-tools
 BuildRequires:	java-devel >= 1:1.7.0
 
 Requires:	jpackage-utils
