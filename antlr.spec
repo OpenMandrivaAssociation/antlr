@@ -5,8 +5,7 @@
 Summary:	ANother Tool for Language Recognition
 Name:		antlr
 Version:	2.7.7
-Release:	32%{?dist}
-Epoch:		0
+Release:	33
 License:	Public Domain
 URL:		http://www.antlr.org/
 Group:		Development/Java
@@ -19,19 +18,15 @@ Patch1:		%{name}-%{version}-newgcc.patch
 # see BZ#848662
 Patch2:		antlr-examples-license.patch
 
-%ifarch %ix86 x86_64 ia64 armv4l sparcv9 alpha s390x ppc ppc64
-%if ! 0%{?rhel} >= 6
-BuildRequires:	mono-core
+BuildRequires:	mono
 BuildRequires:	mono-winforms
-%endif
-%endif
 BuildRequires:	ant
 BuildRequires:	java-javadoc
 BuildRequires:	jpackage-utils javapackages-tools
-BuildRequires:	java-devel >= 1:1.7.0
+BuildRequires:	java-devel >= 1.8.0
 
 Requires:	jpackage-utils
-Requires:	java-headless >= 1:1.7.0
+Requires:	java-headless >= 1.8.0
 
 %description
 ANTLR, ANother Tool for Language Recognition, (formerly PCCTS) is a
