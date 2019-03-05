@@ -40,7 +40,7 @@ Group:		Development/Java
 Summary:	ANother Tool for Language Recognition
 %rename		%{name}
 Requires:	jpackage-utils
-Requires:	java-headless >= 1:1.7.0
+Requires:	java-headless >= 1.8.0
 BuildArch:	noarch
 
 %description	tool
