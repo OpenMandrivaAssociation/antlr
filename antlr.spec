@@ -22,7 +22,7 @@ BuildRequires:	mono
 BuildRequires:	mono-winforms
 BuildRequires:	ant
 BuildRequires:	java-javadoc
-BuildRequires:	jpackage-utils javapackages-tools
+BuildRequires:	jpackage-utils javapackages-tools javapackages-local >= 5.3.0
 BuildRequires:	java-devel >= 1.8.0
 
 Requires:	jpackage-utils
