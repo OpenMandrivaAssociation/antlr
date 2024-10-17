@@ -9,7 +9,7 @@ Name:		antlr
 Version:	2.7.7
 Release:	36
 License:	Public Domain
-URL:		http://www.antlr.org/
+URL:		https://www.antlr.org/
 Group:		Development/Java
 Source0:	http://www.antlr2.org/download/antlr-%{version}.tar.gz
 Source1:	%{name}-build.xml
